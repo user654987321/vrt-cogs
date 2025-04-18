@@ -27,7 +27,7 @@ log = logging.getLogger("red.vrt.levelup.commands.user")
 @app_commands.context_menu(name="View Profile")
 @app_commands.guild_only()
 async def view_profile_context(interaction: discord.Interaction, member: discord.Member):
-    """View a user's profile"""
+    """Schau dir ein Nutzer Profil an"""
     bot: Red = interaction.client
     cog = bot.get_cog("LevelUp")
     if not cog:
