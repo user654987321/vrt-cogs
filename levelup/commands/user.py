@@ -114,9 +114,9 @@ class User(MixinMeta):
     @commands.guild_only()
     @commands.mod_or_permissions(manage_messages=True)
     async def profile_data(self, ctx: commands.Context, user_id: int):
-        """View a user's profile by ID
+        """Schau dir ein Nutzer Profil per ID an
 
-        Useful if user has left the server
+        Nützlich, wenn der Benutzer den Server verlassen hat
         """
         conf = self.db.get_conf(ctx.guild)
         if not conf.enabled:
