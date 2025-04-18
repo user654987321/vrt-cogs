@@ -33,7 +33,10 @@ msgid "\n"
 "    Your friendly neighborhood leveling system\n\n"
 "    Earn experience by chatting in text and voice channels, compare levels with your friends, customize your profile and view various leaderboards!\n"
 "    "
-msgstr ""
+msgstr "\n"
+"    Ihr freundliches Nachbarschafts-Leveling-System\n\n"
+"    Sammeln Sie Erfahrung, indem Sie in Text- und Sprachkanälen chatten, Level mit Ihren Freunden vergleichen, Ihr Profil anpassen und verschiedene Bestenlisten anzeigen!\n"
+"    "
 
 #: levelup\main.py:233
 msgid "LevelUp has successfully migrated to v4!\n"
