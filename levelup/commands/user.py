@@ -814,7 +814,7 @@ class User(MixinMeta):
             return await ctx.send(_("Keine Schriftart mit diesem Namen gefunden!"))
         profile.font = path.name
         self.save()
-        txt = _("YDeine Schriftart wurde zu {} gesetzt").format(f"`{path.name}`")
+        txt = _("Deine Schriftart wurde zu {} gesetzt").format(f"`{path.name}`")
         await ctx.send(txt)
 
     @set_user_font.autocomplete("font_name")
