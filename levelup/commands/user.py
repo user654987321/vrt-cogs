@@ -139,8 +139,9 @@ class User(MixinMeta):
     @commands.hybrid_command(name="profile", aliases=["pf"])
     @commands.guild_only()
     @commands.cooldown(3, 10, commands.BucketType.user)
-    async def profile(self, ctx: commands.Context, *, user: t.Optional[discord.Member] = None, unsichtbar: t.Optional\[bool\] = False):
-        """Sieh dir dein Benutzerprofil an (optional 'unsichtbar: true' nur für dich sichtbar)"""
+    @app_commands.describe(user="Der Benutzer, dessen Profil du sehen willst", unsichtbar="Ob die Antwort nur für dich sichtbar sein soll")
+    async def profile(self, ctx: commands.Context, *, user: t.Optional[discord.Member] = None, unsichtbar: t.Optional[bool] = False):
+        """Sieh dir dein Benutzerprofil an (optional 'unsichtbar: true' nur für dich sichtbar [nur bei /profile nutzbar])"""
         conf = self.db.get_conf(ctx.guild)
         if not conf.enabled:
             txt = _("Das Levelsystem ist auf diesen Server deaktiviert!")
