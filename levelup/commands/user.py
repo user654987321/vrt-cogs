@@ -186,9 +186,9 @@ class User(MixinMeta):
                 await ctx.defer(ephemeral=True)
                 result = await self.get_user_profile_cached(user)
                 if isinstance(result, discord.Embed):
-                    await ctx.send(content=new_user_txt, embed=result, ephemeral=True)
+                    await ctx.send(content=new_user_txt, embed=result, ephemeral=False)
                 else:  # File
-                    await ctx.send(content=new_user_txt, file=result, ephemeral=True)
+                    await ctx.send(content=new_user_txt, file=result, ephemeral=False)
         except Exception as e:
             log.error("Error generating profile", exc_info=e)
             if "Payload Too Large" in str(e):
