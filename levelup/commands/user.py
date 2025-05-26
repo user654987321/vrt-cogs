@@ -139,8 +139,8 @@ class User(MixinMeta):
     @commands.hybrid_command(name="profile", aliases=["pf"])
     @commands.guild_only()
     @commands.cooldown(3, 10, commands.BucketType.user)
-    async def profile(self, ctx: commands.Context, *, user: t.Optional[discord.Member] = None):
-        """Sieh dir dein Benutzerprofil an"""
+    async def profile(self, ctx: commands.Context, *, user: t.Optional[discord.Member] = None, unsichtbar: t.Optional\[bool\] = False):
+        """Sieh dir dein Benutzerprofil an (optional 'unsichtbar: true' nur für dich sichtbar)"""
         conf = self.db.get_conf(ctx.guild)
         if not conf.enabled:
             txt = _("Das Levelsystem ist auf diesen Server deaktiviert!")
@@ -186,9 +186,9 @@ class User(MixinMeta):
                 await ctx.defer(ephemeral=True)
                 result = await self.get_user_profile_cached(user)
                 if isinstance(result, discord.Embed):
-                    await ctx.send(content=new_user_txt, embed=result, ephemeral=False)
+                    await ctx.send(content=new_user_txt, embed=result, ephemeral=unsichtbar)
                 else:  # File
-                    await ctx.send(content=new_user_txt, file=result, ephemeral=False)
+                    await ctx.send(content=new_user_txt, file=result, ephemeral=unsichtbar)
         except Exception as e:
             log.error("Error generating profile", exc_info=e)
             if "Payload Too Large" in str(e):
