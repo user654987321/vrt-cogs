@@ -184,7 +184,7 @@ class User(MixinMeta):
                             result.fp.seek(0)
                             await ctx.send(content=new_user_txt, file=result)
             else:
-                await ctx.defer(ephemeral=True)
+                await ctx.defer(ephemeral=unsichtbar)
                 result = await self.get_user_profile_cached(user)
                 if isinstance(result, discord.Embed):
                     await ctx.send(content=new_user_txt, embed=result, ephemeral=unsichtbar)
