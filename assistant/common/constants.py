@@ -33,6 +33,8 @@ MODELS = {
     "o1-preview-2024-09-12": 128000,
     "o1-mini": 128000,
     "o1-mini-2024-09-12": 128000,
+    "o3": 200000,
+    "o3-2025-04-16": 200000,
     "o3-mini": 200000,
     "o3-mini-2025-01-31": 200000,
 }
@@ -78,6 +80,7 @@ PRICES = {  # Price per 1k tokens
     "o1-preview-2024-09-12": [0.015, 0.06],
     "o1-mini": [0.003, 0.012],
     "o1-mini-2024-09-12": [0.003, 0.012],
+    "o3": [0.002, 0.008],
     "o3-mini": [0.0011, 0.0044],
     "o3-mini-2025-01-31": [0.0011, 0.0044],
     "text-ada-001": [0.0004, 0.0016],
@@ -91,6 +94,19 @@ PRICES = {  # Price per 1k tokens
     "text-embedding-3-small": [0.00002, 0.00002],
     "text-embedding-3-large": [0.00013, 0.00013],
 }
+VISION_COSTS = {
+    "gpt-4o": [85, 170],  # 85 base tokens, 170 per (32x32) pixel tile in the image
+    "gpt-4o-2024-05-13": [85, 170],
+    "gpt-4o-2024-08-06": [85, 170],
+    "gpt-4o-2024-11-20": [85, 170],
+    "gpt-4o-mini": [2833, 5667],  # 2833 base tokens, 5667 per (32x32) pixel tile in the image
+    "gpt-4o-mini-2024-07-18": [2833, 5667],
+    "gpt-4.1": [85, 170],  # 85 base tokens, 170 per (32x32) pixel tile in the image
+    "gpt-4.1-2025-04-14": [85, 170],
+    "o1": [75, 150],  # 75 base tokens, 150 per (32x32) pixel tile in the image
+    "o1-2024-12-17": [75, 150],
+    # 75 base tokens, 150 per (32x32) pixel tile in the image
+}
 IMAGE_COSTS = {
     "standard1024x1024": 0.04,
     "standard1792x1024": 0.08,
@@ -98,6 +114,15 @@ IMAGE_COSTS = {
     "hd1024x1024": 0.08,
     "hd1792x1024": 0.12,
     "hd1024x1792": 0.12,
+    "low1024x1024": 0.011,
+    "low1024x1536": 0.016,
+    "low1536x1024": 0.016,
+    "medium1024x1024": 0.042,
+    "medium1024x1536": 0.063,
+    "medium1536x1024": 0.063,
+    "high1024x1024": 0.167,
+    "high1024x1536": 0.25,
+    "high1536x1024": 0.25,
 }
 SUPPORTS_SEED = [
     "gpt-3.5-turbo",
@@ -153,6 +178,8 @@ SUPPORTS_VISION = [
     "o1-2024-12-17",
     # "o3-mini",
     # "o3-mini-2025-01-31",
+    "o3",
+    "o3-2025-04-16",
 ]
 SUPPORTS_TOOLS = [
     "gpt-3.5-turbo-1106",
@@ -180,6 +207,8 @@ SUPPORTS_TOOLS = [
     "o1-2024-12-17",
     "o3-mini",
     "o3-mini-2025-01-31",
+    "o3",
+    "o3-2025-04-16",
 ]
 READ_EXTENSIONS = [
     ".txt",
@@ -260,18 +289,23 @@ GENERATE_IMAGE = {
             },
             "quality": {
                 "type": "string",
-                "enum": ["standard", "hd"],
-                "description": "The quality of the image, defaults to standard",
+                "enum": ["standard", "hd", "low", "medium", "high"],
+                "description": "The quality of the image. For dall-e-3, use 'standard' or 'hd'. For gpt-image-1, use 'low', 'medium', or 'high'. Defaults to 'medium'.",
             },
             "style": {
                 "type": "string",
                 "enum": ["natural", "vivid"],
-                "description": "Vivid leans toward more hyper-real and dramatic images. Natural creates more natural, less hyper-real looking images. Defaults to 'vivid'",
+                "description": "Vivid leans toward more hyper-real and dramatic images. Natural creates more natural, less hyper-real looking images. Only applies to dall-e-3. Defaults to 'vivid'",
             },
             "size": {
                 "type": "string",
-                "enum": ["1024x1024", "1792x1024", "1024x1792"],
+                "enum": ["1024x1024", "1792x1024", "1024x1792", "1024x1536", "1536x1024"],
                 "description": "The size of the image, defaults to 1024x1024",
+            },
+            "model": {
+                "type": "string",
+                "enum": ["dall-e-3", "gpt-image-1"],
+                "description": "The model to use for image generation. dall-e-3 is the standard model, gpt-image-1 is a newer model with different pricing. Defaults to 'dall-e-3'",
             },
         },
         "required": ["prompt"],
