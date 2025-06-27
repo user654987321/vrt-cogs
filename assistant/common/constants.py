@@ -311,6 +311,21 @@ GENERATE_IMAGE = {
         "required": ["prompt"],
     },
 }
+EDIT_IMAGE = {
+    "name": "edit_image",
+    "description": "Use this to edit an existing image for a user. (Use this is the user tells you to do something to an image!)",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "prompt": {
+                "type": "string",
+                "description": "Pass the user's prompt directly as this argument and make sure it includes to keep the image exactly the same except for the changes they want to make.",
+            },
+        },
+        "required": ["prompt"],
+    },
+}
+
 
 SEARCH_INTERNET = {
     "name": "search_internet",
