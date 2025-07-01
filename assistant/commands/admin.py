@@ -136,6 +136,17 @@ class Admin(MixinMeta):
                 inline=False,
             )
 
+        if conf.listen_channels:
+            valid = [i for i in conf.listen_channels if ctx.guild.get_channel(i)]
+            if len(valid) != len(conf.listen_channels):
+                conf.listen_channels = valid
+                await self.save_conf()
+            embed.add_field(
+                name=_("Auto-Reply Channels"),
+                value=humanize_list([f"<#{i}>" for i in valid]),
+                inline=False,
+            )
+
         types = set(len(i.embedding) for i in conf.embeddings.values())
 
         if len(types) == 2:
@@ -287,7 +298,7 @@ class Admin(MixinMeta):
                 value = _("Your Brave websearch API key is set!")
             else:
                 value = _(
-                    "Enables the use of the `search_internet` function\n"
+                    "Enables the use of the `search_web_brave` function\n"
                     "Get your API key **[Here](https://brave.com/search/api/)**\n"
                 )
             embed.add_field(name=_("Brave Websearch API key"), value=value)
@@ -444,7 +455,7 @@ class Admin(MixinMeta):
     @commands.is_owner()
     async def set_brave_key(self, ctx: commands.Context):
         """
-        Enables use of the `search_internet` function
+        Enables use of the `search_web_brave` function
 
         Get your API key **[Here](https://brave.com/search/api/)**
         """
@@ -710,7 +721,7 @@ class Admin(MixinMeta):
         ctx: commands.Context,
         channel: Union[discord.TextChannel, discord.Thread, discord.ForumChannel, None] = None,
     ):
-        """Set the channel for the assistant"""
+        """Set the main auto-response channel for the assistant"""
         conf = self.db.get_conf(ctx.guild)
         if channel is None and not conf.channel_id:
             return await ctx.send_help()
@@ -723,6 +734,20 @@ class Admin(MixinMeta):
         else:
             await ctx.send(_("Channel id has been set"))
             conf.channel_id = channel.id
+        await self.save_conf()
+
+    @assistant.command(name="listen")
+    async def toggle_listen(self, ctx: commands.Context):
+        """Toggle this channel as an auto-response channel"""
+        conf = self.db.get_conf(ctx.guild)
+        if conf.channel_id == ctx.channel.id:
+            return await ctx.send(_("This channel is already set as the assistant channel!"))
+        if ctx.channel.id in conf.listen_channels:
+            conf.listen_channels.remove(ctx.channel.id)
+            await ctx.send(_("I will no longer auto-respond to messages in this channel!"))
+        else:
+            conf.listen_channels.append(ctx.channel.id)
+            await ctx.send(_("I will now auto-respond to messages in this channel!"))
         await self.save_conf()
 
     @assistant.command(name="sysoverride")
@@ -1016,7 +1041,7 @@ class Admin(MixinMeta):
         if not await self.can_call_llm(conf, ctx):
             return
         async with ctx.typing():
-            synced = await self.resync_embeddings(conf)
+            synced = await self.resync_embeddings(conf, ctx.guild.id)
             if synced:
                 await ctx.send(_("{} embeddings have been updated").format(synced))
             else:
@@ -1392,6 +1417,7 @@ class Admin(MixinMeta):
 
             conf.embeddings[name] = Embedding(text=text, embedding=query_embedding, model=conf.embed_model)
             imported += 1
+        await asyncio.to_thread(conf.sync_embeddings, ctx.guild.id)
         await message.edit(content=_("{}\n**COMPLETE**").format(message_text))
         await ctx.send(_("Successfully imported {} embeddings!").format(humanize_number(imported)))
         await self.save_conf()
@@ -1439,6 +1465,7 @@ class Admin(MixinMeta):
                     humanize_list(files), humanize_number(imported)
                 )
             )
+        await asyncio.to_thread(conf.sync_embeddings, ctx.guild.id)
         await self.save_conf()
 
     @assistant.command(name="importexcel")
@@ -1525,6 +1552,7 @@ class Admin(MixinMeta):
                 imported += 1
 
             if imported:
+                await asyncio.to_thread(conf.sync_embeddings, ctx.guild.id)
                 await message.edit(content=_("{}\n**COMPLETE**").format(message_text))
                 await ctx.send(_("Successfully imported {} embeddings!").format(humanize_number(imported)))
                 await self.save_conf()
@@ -2111,8 +2139,9 @@ class Admin(MixinMeta):
         """
         if not yes_or_no:
             return await ctx.send(_("Not wiping embedding data"))
-        for conf in self.db.configs.values():
+        for guild_id, conf in self.db.configs.items():
             conf.embeddings = {}
+            await asyncio.to_thread(conf.sync_embeddings, guild_id)
         await ctx.send(_("All embedding data has been wiped for all servers!"))
         await self.save_conf()
 

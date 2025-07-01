@@ -393,9 +393,9 @@ class ChatHandler(MixinMeta):
             function_calls = [i for i in function_calls if i["name"] != "list_memories"]
             del function_map["list_memories"]
 
-        if "search_internet" in function_map and not self.db.brave_api_key:
-            function_calls = [i for i in function_calls if i["name"] != "search_internet"]
-            del function_map["search_internet"]
+        if "search_web_brave" in function_map and not self.db.brave_api_key:
+            function_calls = [i for i in function_calls if i["name"] != "search_web_brave"]
+            del function_map["search_web_brave"]
 
         if "edit_image" in function_map and (not conversation.get_images() and not images):
             function_calls = [i for i in function_calls if i["name"] != "edit_image"]
@@ -776,7 +776,7 @@ class ChatHandler(MixinMeta):
 
         max_tokens = self.get_max_tokens(conf, author)
 
-        related = await asyncio.to_thread(conf.get_related_embeddings, query_embedding)
+        related = await asyncio.to_thread(conf.get_related_embeddings, guild.id, query_embedding)
 
         embeds: List[str] = []
         # Get related embeddings (Name, text, score, dimensions)

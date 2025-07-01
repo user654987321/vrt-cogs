@@ -140,8 +140,13 @@ class AssistantFunctions(MixinMeta):
         }
         return payload
 
-    async def search_internet(
-        self, guild: discord.Guild, search_query: str, search_result_amount: int = 10, *args, **kwargs
+    async def search_web_brave(
+        self,
+        guild: discord.Guild,
+        query: str,
+        num_results: int = 5,
+        *args,
+        **kwargs,
     ):
         if not self.db.brave_api_key:
             return "Error: Brave API key is not set!"
@@ -155,10 +160,10 @@ class AssistantFunctions(MixinMeta):
         locale_parts = str(guild.preferred_locale).split("-")
         country = locale_parts[1].lower() if len(locale_parts) > 1 else "us"
         params = {
-            "q": search_query,
+            "q": query,
             "country": country,
             "search_lang": str(guild.preferred_locale).split("-")[0],
-            "count": search_result_amount,
+            "count": num_results,
             "safesearch": "off",
         }
         async with aiohttp.ClientSession() as session:
@@ -229,6 +234,7 @@ class AssistantFunctions(MixinMeta):
 
     async def search_memories(
         self,
+        guild: discord.Guild,
         conf: GuildSettings,
         search_query: str,
         amount: int = 2,
@@ -256,6 +262,7 @@ class AssistantFunctions(MixinMeta):
 
         embeddings = await asyncio.to_thread(
             conf.get_related_embeddings,
+            guild_id=guild.id,
             query_embedding=query_embedding,
             top_n_override=amount,
             relatedness_override=0.5,
@@ -272,6 +279,7 @@ class AssistantFunctions(MixinMeta):
 
     async def edit_memory(
         self,
+        guild: discord.Guild,
         conf: GuildSettings,
         user: discord.Member,
         memory_name: str,
@@ -293,6 +301,7 @@ class AssistantFunctions(MixinMeta):
         conf.embeddings[memory_name].embedding = embedding
         conf.embeddings[memory_name].update()
         conf.embeddings[memory_name].model = conf.embed_model
+        await asyncio.to_thread(conf.sync_embeddings, guild.id)
         asyncio.create_task(self.save_conf())
         return "Your memory has been updated!"
 

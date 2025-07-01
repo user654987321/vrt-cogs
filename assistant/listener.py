@@ -96,7 +96,7 @@ class AssistantListener(MixinMeta):
             return
 
         conditions = [
-            channel.id != conf.channel_id,
+            (channel.id != conf.channel_id and channel.id not in conf.listen_channels),
             (not bot_mentioned or not conf.mention_respond),
         ]
         check_auto_answer = [
@@ -112,6 +112,7 @@ class AssistantListener(MixinMeta):
                 embedding = await self.request_embedding(message.content, conf)
                 related = await asyncio.to_thread(
                     conf.get_related_embeddings,
+                    guild_id=message.guild.id,
                     query_embedding=embedding,
                     top_n_override=1,
                     relatedness_override=conf.auto_answer_threshold,
@@ -124,7 +125,7 @@ class AssistantListener(MixinMeta):
             return
 
         conditions = [
-            channel.id == conf.channel_id,
+            (channel.id == conf.channel_id or channel.id in conf.listen_channels),
             not message.content.endswith("?"),
             conf.endswith_questionmark,
             self.bot.user.id not in mention_ids,
