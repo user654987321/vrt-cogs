@@ -141,7 +141,7 @@ class GuildSettings(AssistantBaseModel):
         if not collection:
             collection = _chroma_client.create_collection(
                 f"assistant-{guild_id}",
-                metadata={"hnsw:space": "cosine", "guild_id": guild_id},
+                configuration={"hnsw": {"space": "cosine"}},
             )
             # Populate the collection with existing embeddings
             ids = list(self.embeddings.keys())
@@ -239,11 +239,18 @@ class GuildSettings(AssistantBaseModel):
         strings_and_relatedness = []
         for idx in range(len(results["ids"][0])):
             embed_name = results["ids"][0][idx]
+            embed_obj = self.embeddings.get(embed_name)
+            if not embed_obj:
+                # In collection but not config, remove it
+                collection.delete(ids=[embed_name])
+                continue
             embedding = self.embeddings[embed_name].embedding
             metadata = results["metadatas"][0][idx] if results["metadatas"] else {}
             distance = results["distances"][0][idx] if results["distances"] else 0.0
-            if distance >= min_relatedness:
-                strings_and_relatedness.append((embed_name, metadata["text"], distance, len(embedding)))
+            relatedness = 1 - distance
+            if relatedness >= min_relatedness:
+                strings_and_relatedness.append((embed_name, metadata["text"], relatedness, len(embedding)))
+
         end = perf_counter()
         iter_time = end - start
         log.debug(

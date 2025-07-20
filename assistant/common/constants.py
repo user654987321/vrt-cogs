@@ -409,3 +409,25 @@ LIST_MEMORIES = {
         "properties": {},
     },
 }
+DO_NOT_RESPOND_SCHEMA = {
+    "name": "do_not_respond",
+    "description": "Call this function if you do not want to or do not need to respond to the user.",
+    "parameters": {
+        "type": "object",
+        "properties": {},
+    },
+}
+RESPOND_AND_CONTINUE = {
+    "name": "respond_and_continue",
+    "description": "Call this function if you want to respond to the user but also continue working on the task at hand.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "content": {
+                "type": "string",
+                "description": "The message to send to the user, this can be something like 'I will continue working on this task, please wait.' or 'I will get back to you shortly.'",
+            },
+        },
+        "required": ["content"],
+    },
+}
